@@ -1,2 +1,2 @@
-# lxiv
+# titilOS
 - uefi kernel

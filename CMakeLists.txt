@@ -33,7 +33,7 @@ if(NOT EXISTS ${ae2f_ProjRoot}/${ae2f_submod}/ncroxon/gnu-efi)
 
 endif()
 
-message(STATUS "[lxiv] Processor: ${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "[titil] Processor: ${CMAKE_SYSTEM_PROCESSOR}")
 if(NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "You need to set processor with -DCMAKE_SYSTEM_PROCESSOR=<target>")
 endif()
@@ -42,7 +42,7 @@ if(NOT DEFINED LXIV_TDCOUNT)
 	set(LXIV_TDCOUNT 1)
 endif()
 
-message(STATUS "[lxiv::LXIV_TDCOUNT] threadcount for make: ${LXIV_TDCOUNT}")
+message(STATUS "[titil::LXIV_TDCOUNT] threadcount for make: ${LXIV_TDCOUNT}")
 
 add_custom_target(
 	gnu-efi ALL ${CMAKE_MAKE_PROGRAM} ARCH=${CMAKE_SYSTEM_PROCESSOR} -j${LXIV_TDCOUNT}
@@ -62,46 +62,46 @@ add_custom_target(clean-all
 
 # ========================================
 
-project(lxiv)
-set(lxivgnuefi ${ae2f_ProjRoot}/${ae2f_submod}/ncroxon/gnu-efi)
+project(titil)
+set(titilgnuefi ${ae2f_ProjRoot}/${ae2f_submod}/ncroxon/gnu-efi)
 
-file(GLOB_RECURSE lxiv-src "${CMAKE_SOURCE_DIR}/app/*")
+file(GLOB_RECURSE titil-src "${CMAKE_SOURCE_DIR}/app/*")
 
-add_library(lxiv-obj OBJECT ${lxiv-src})
-target_compile_options(lxiv-obj PRIVATE 
+add_library(titil-obj OBJECT ${titil-src})
+target_compile_options(titil-obj PRIVATE 
 	-fpic -ffreestanding -fno-stack-protector 
 	-fno-stack-check -fshort-wchar 
 	-mno-red-zone -maccumulate-outgoing-args
 	-DEFI_FUNCTION_WRAPPER
 	)
 
-target_include_directories(lxiv-obj PUBLIC ${ae2f_ProjRoot}/${ae2f_submod}/ncroxon/gnu-efi/inc)
-target_include_directories(lxiv-obj PUBLIC ${ae2f_ProjRoot}/${ae2f_submod}/ncroxon/gnu-efi/inc/${CMAKE_SYSTEM_PROCESSOR})
-add_dependencies(lxiv-obj gnu-efi)
+target_include_directories(titil-obj PUBLIC ${ae2f_ProjRoot}/${ae2f_submod}/ncroxon/gnu-efi/inc)
+target_include_directories(titil-obj PUBLIC ${ae2f_ProjRoot}/${ae2f_submod}/ncroxon/gnu-efi/inc/${CMAKE_SYSTEM_PROCESSOR})
+add_dependencies(titil-obj gnu-efi)
 
 # ========================================
 
-option(lxiv-qemu "" ON)
-if(${lxiv-qemu})
-	message(STATUS "[lxiv-qemu] qemu test is activated")
+option(titil-qemu "" ON)
+if(${titil-qemu})
+	message(STATUS "[titil-qemu] qemu test is activated")
 	file(MAKE_DIRECTORY	${CMAKE_CURRENT_BINARY_DIR}/efitest/EFI/BOOT)
 	set(output_efi ${CMAKE_CURRENT_BINARY_DIR}/efitest/EFI/BOOT/BOOTX64.EFI)
 	add_custom_command(
-		MAIN_DEPENDENCY	${CMAKE_CURRENT_BINARY_DIR}/lxiv.efi
-		COMMAND	${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/lxiv.efi ${output_efi}
+		MAIN_DEPENDENCY	${CMAKE_CURRENT_BINARY_DIR}/titil.efi
+		COMMAND	${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/titil.efi ${output_efi}
 		OUTPUT	${output_efi}
-		COMMENT	"[lxiv-qemu] copying efi for test"
+		COMMENT	"[titil-qemu] copying efi for test"
 		)
 
-	message(STATUS "[lxiv-qemu] LXIV_OVMF_CODE_FD: ${LXIV_OVMF_CODE_FD}")
-	message(STATUS "[lxiv-qemu] LXIV_OVMF_VARS_FD: ${LXIV_OVMF_VARS_FD}")
+	message(STATUS "[titil-qemu] LXIV_OVMF_CODE_FD: ${LXIV_OVMF_CODE_FD}")
+	message(STATUS "[titil-qemu] LXIV_OVMF_VARS_FD: ${LXIV_OVMF_VARS_FD}")
 
 	if(NOT DEFINED LXIV_OVMF_CODE_FD)
-		message(FATAL_ERROR "[lxiv-qemu] You need to define LXIV_OVMF_CODE_FD")
+		message(FATAL_ERROR "[titil-qemu] You need to define LXIV_OVMF_CODE_FD")
 	endif()
 
 	if(NOT DEFINED LXIV_OVMF_VARS_FD)
-		message(FATAL_ERROR "[lxiv-qemu] You need to define LXIV_OVMF_VARS_FD")
+		message(FATAL_ERROR "[titil-qemu] You need to define LXIV_OVMF_VARS_FD")
 	endif()
 
 	configure_file(
@@ -109,35 +109,35 @@ if(${lxiv-qemu})
 		${CMAKE_CURRENT_BINARY_DIR}/test-qemu.sh
 		)
 else()
-	set(output_efi ${CMAKE_CURRENT_BINARY_DIR}/lxiv.efi)
+	set(output_efi ${CMAKE_CURRENT_BINARY_DIR}/titil.efi)
 endif()
 
 # ========================================
 
-message(STATUS "[lxiv] linker: ${CMAKE_LINKER}")
+message(STATUS "[titil] linker: ${CMAKE_LINKER}")
 
 add_custom_command(
-	DEPENDS	$<TARGET_OBJECTS:lxiv-obj>
-	OUTPUT	${CMAKE_CURRENT_BINARY_DIR}/lxiv.so
+	DEPENDS	$<TARGET_OBJECTS:titil-obj>
+	OUTPUT	${CMAKE_CURRENT_BINARY_DIR}/titil.so
 	COMMAND ${CMAKE_LINKER}
 	-shared -Bsymbolic
 	-nostdlib
 	-znocombreloc
-	-L${lxivgnuefi}/${CMAKE_SYSTEM_PROCESSOR}/lib
-	-L${lxivgnuefi}/${CMAKE_SYSTEM_PROCESSOR}/gnuefi
-	-L${lxivgnuefi}/${CMAKE_SYSTEM_PROCESSOR}/gnuefi
-	-T${lxivgnuefi}/gnuefi/elf_${CMAKE_SYSTEM_PROCESSOR}_efi.lds
-	$<TARGET_OBJECTS:lxiv-obj>
-	-o ${CMAKE_CURRENT_BINARY_DIR}/lxiv.so
-	${lxivgnuefi}/${CMAKE_SYSTEM_PROCESSOR}/gnuefi/crt0-efi-${CMAKE_SYSTEM_PROCESSOR}.o
+	-L${titilgnuefi}/${CMAKE_SYSTEM_PROCESSOR}/lib
+	-L${titilgnuefi}/${CMAKE_SYSTEM_PROCESSOR}/gnuefi
+	-L${titilgnuefi}/${CMAKE_SYSTEM_PROCESSOR}/gnuefi
+	-T${titilgnuefi}/gnuefi/elf_${CMAKE_SYSTEM_PROCESSOR}_efi.lds
+	$<TARGET_OBJECTS:titil-obj>
+	-o ${CMAKE_CURRENT_BINARY_DIR}/titil.so
+	${titilgnuefi}/${CMAKE_SYSTEM_PROCESSOR}/gnuefi/crt0-efi-${CMAKE_SYSTEM_PROCESSOR}.o
 	-l:libgnuefi.a
 	-l:libefi.a
 	VERBATIM
 	)
 
 add_custom_command(
-	OUTPUT		${CMAKE_CURRENT_BINARY_DIR}/lxiv.efi 
-	MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/lxiv.so
+	OUTPUT		${CMAKE_CURRENT_BINARY_DIR}/titil.efi 
+	MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/titil.so
 	COMMAND objcopy
 	-j .text
 	-j .sdata               
@@ -150,12 +150,12 @@ add_custom_command(
 	-j .reloc             
 	--strip-debug
 	--output-target=efi-app-${CMAKE_SYSTEM_PROCESSOR}
-	${CMAKE_CURRENT_BINARY_DIR}/lxiv.so
-	${CMAKE_CURRENT_BINARY_DIR}/lxiv.efi 
+	${CMAKE_CURRENT_BINARY_DIR}/titil.so
+	${CMAKE_CURRENT_BINARY_DIR}/titil.efi 
 	VERBATIM
 	)
 
-add_custom_target(lxiv ALL SOURCES ${output_efi})
-add_dependencies(lxiv lxiv-obj)
+add_custom_target(titil ALL SOURCES ${output_efi})
+add_dependencies(titil titil-obj)
 
 # ========================================
