@@ -38,14 +38,14 @@ if(NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
 	message(FATAL_ERROR "You need to set processor with -DCMAKE_SYSTEM_PROCESSOR=<target>")
 endif()
 
-if(NOT DEFINED LXIV_TDCOUNT)
-	set(LXIV_TDCOUNT 1)
+if(NOT DEFINED TITIL_TDCOUNT)
+	set(TITIL_TDCOUNT 1)
 endif()
 
-message(STATUS "[titil::LXIV_TDCOUNT] threadcount for make: ${LXIV_TDCOUNT}")
+message(STATUS "[titil::TITIL_TDCOUNT] threadcount for make: ${TITIL_TDCOUNT}")
 
 add_custom_target(
-	gnu-efi ALL ${CMAKE_MAKE_PROGRAM} ARCH=${CMAKE_SYSTEM_PROCESSOR} -j${LXIV_TDCOUNT}
+	gnu-efi ALL ${CMAKE_MAKE_PROGRAM} ARCH=${CMAKE_SYSTEM_PROCESSOR} -j${TITIL_TDCOUNT}
 	WORKING_DIRECTORY      ${ae2f_ProjRoot}/${ae2f_submod}/ncroxon/gnu-efi
 	VERBATIM
 	BYPRODUCTS
@@ -93,15 +93,15 @@ if(${titil-qemu})
 		COMMENT	"[titil-qemu] copying efi for test"
 		)
 
-	message(STATUS "[titil-qemu] LXIV_OVMF_CODE_FD: ${LXIV_OVMF_CODE_FD}")
-	message(STATUS "[titil-qemu] LXIV_OVMF_VARS_FD: ${LXIV_OVMF_VARS_FD}")
+	message(STATUS "[titil-qemu] TITIL_OVMF_CODE_FD: ${TITIL_OVMF_CODE_FD}")
+	message(STATUS "[titil-qemu] TITIL_OVMF_VARS_FD: ${TITIL_OVMF_VARS_FD}")
 
-	if(NOT DEFINED LXIV_OVMF_CODE_FD)
-		message(FATAL_ERROR "[titil-qemu] You need to define LXIV_OVMF_CODE_FD")
+	if(NOT DEFINED TITIL_OVMF_CODE_FD)
+		message(FATAL_ERROR "[titil-qemu] You need to define TITIL_OVMF_CODE_FD")
 	endif()
 
-	if(NOT DEFINED LXIV_OVMF_VARS_FD)
-		message(FATAL_ERROR "[titil-qemu] You need to define LXIV_OVMF_VARS_FD")
+	if(NOT DEFINED TITIL_OVMF_VARS_FD)
+		message(FATAL_ERROR "[titil-qemu] You need to define TITIL_OVMF_VARS_FD")
 	endif()
 
 	configure_file(
